@@ -1,20 +1,21 @@
 // ==UserScript==
 // @name         Tic Tac Toe Board Evaluation for papergames
 // @namespace    https://github.com/longkidkoolstar
-// @version      0.1
+// @version      1.0
 // @description  Visually shows you the best moves for both teams. Now works at the same time as the AI script I made.
 // @author       longkidkoolstar
 // @icon         https://th.bing.com/th/id/R.5de7901f1a6f988b52dfb02dbd0dfa51?rik=X5ve69dTtmqQ9A&pid=ImgRaw&r=0
 // @match        https://papergames.io/*
 // @license      none
-// @grant        none
+// @grant        GM.setValue
+// @grant        GM.getValue
 // ==/UserScript==
 
 
-(function() {
+(async function() {
     'use strict';
 
-var depth = localStorage.getItem('depth');
+var depth = await GM.getValue('depth', depth);
 
 // Function to check if the element is visible
 function isElementVisible(element) {
@@ -80,25 +81,28 @@ function simulateCellClick(row, col) {
 
     var prevChronometerValue = null;
 
+// Check if username is stored using GM.getValue
+(async function() {
+    let user = await GM.getValue('user', '');
 
-      // Check if username is stored in local storage
-      var username = localStorage.getItem('username');
+    if (!user) {
+        // Alert the user
+        alert('Username is not stored.');
 
-      if (!username) {
-          // Alert the user
-          alert('Username is not stored in local storage.');
+        // Prompt the user to enter the username
+        user = prompt('Please enter your Papergames username (case-sensitive):');
 
-          // Prompt the user to enter the username
-          username = prompt('Please enter your Papergames username (case-sensitive):');
-
-          // Save the username to local storage
-          localStorage.setItem('username', username);
-      }
-
-function logout() {
-        localStorage.removeItem('username');
-        location.reload();
+        // Save the username using GM.setValue
+        await GM.setValue('user', user);
     }
+})();
+
+async function logout() {
+    // Remove the stored username
+    await GM.deleteValue('user');
+    location.reload();
+}
+
 
     function createLogoutButton() {
         var logoutButton = document.createElement('button');
@@ -121,7 +125,7 @@ function logout() {
     createLogoutButton();
 //------------------------------------------------
 
-(function() {
+(async function() {
     'use strict';
 
     // Create a container for the dropdown
@@ -184,13 +188,13 @@ function logout() {
     depthSlider.type = 'range';
     depthSlider.min = '1';
     depthSlider.max = '100';
-    var storedDepth = localStorage.getItem('depth');
+    var storedDepth = await GM.getValue('depth');
     depthSlider.value = storedDepth !== null ? storedDepth : '20';
 
     // Add event listener to the depth slider
-    depthSlider.addEventListener('input', function(event) {
+    depthSlider.addEventListener('input', async function(event) {
         var depth = Math.round(depthSlider.value);
-        localStorage.setItem('depth', depth.toString());
+        await GM.setValue('depth', depth.toString());
 
         // Show the popup with the current depth value
         var popup = document.querySelector('.depth-popup'); // Use an existing popup or create a new one
@@ -377,7 +381,7 @@ function updateBoard(squareId) {
     var profileOpener = null;
 
     profileOpeners.forEach(function(opener) {
-        if (opener.textContent.trim() === username) {
+        if (opener.textContent.trim() === user) {
             profileOpener = opener;
         }
     });
