@@ -1,14 +1,15 @@
 // ==UserScript==
-// @name         Tic Tac Toe AI for papergames
+// @name         Tic Tac Toe Board Evaluation for papergames
 // @namespace    https://github.com/longkidkoolstar
-// @version      0.4.3
-// @description  AI plays Tic-Tac-Toe for you on papergames.io. Have fun and destroy some nerds 😃!!
+// @version      0.1
+// @description  Visually shows you the best moves for both teams. Now works at the same time as the AI script I made.
 // @author       longkidkoolstar
-// @icon         https://th.bing.com/th/id/R.3502d1ca849b062acb85cf68a8c48bcd?rik=LxTvt1UpLC2y2g&pid=ImgRaw&r=0
+// @icon         https://th.bing.com/th/id/R.5de7901f1a6f988b52dfb02dbd0dfa51?rik=X5ve69dTtmqQ9A&pid=ImgRaw&r=0
 // @match        https://papergames.io/*
 // @license      none
 // @grant        none
 // ==/UserScript==
+
 
 (function() {
     'use strict';
