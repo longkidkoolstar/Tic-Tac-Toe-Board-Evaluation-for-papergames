@@ -401,7 +401,7 @@ function updateBoard(squareId) {
 
     if (currentElement.textContent !== prevChronometerValue && profileOpener) {
         prevChronometerValue = currentElement.textContent;
-        simulateCellClick(row, col);
+        //simulateCellClick(row, col);
     } else {
         console.log("Waiting for AI's turn...");
     }
@@ -434,10 +434,9 @@ function initAITurn() {
 }
 
 function findBestMove(board, player) {
-    console.log("Current player: " + player); // Debug statement to show the value of the player variable
-
     var bestVal = -1000;
     var bestMove = { row: -1, col: -1 };
+    var moveEvaluations = []; // Array to store evaluations
 
     for (var i = 0; i < 3; i++) {
         for (var j = 0; j < 3; j++) {
@@ -445,6 +444,8 @@ function findBestMove(board, player) {
                 board[i][j] = player;
                 var moveVal = minimax(board, 0, false, depth);
                 board[i][j] = '_';
+
+                moveEvaluations.push({ row: i, col: j, value: moveVal });
 
                 if (moveVal > bestVal) {
                     bestMove.row = i;
@@ -455,9 +456,41 @@ function findBestMove(board, player) {
         }
     }
 
-    console.log("The value of the best Move is: " + bestVal);
+    // Call a function to display the evaluations on the board
+    displayMoveEvaluations(moveEvaluations);
+
     return bestMove;
 }
+
+function displayMoveEvaluations(evaluations) {
+    var gridItems = document.querySelectorAll('.grid.size-3x3 .grid-item');
+
+    // First, remove any existing evaluation spans
+    gridItems.forEach(function(cell) {
+        var existingSpan = cell.querySelector('span');
+        if (existingSpan) {
+            cell.removeChild(existingSpan);
+        }
+    });
+
+    // Now, add the new evaluations
+    evaluations.forEach(function(move) {
+        var cell = gridItems[move.row * 3 + move.col];
+
+        // Create a span element to display the evaluation value
+        var evaluationSpan = document.createElement('span');
+        evaluationSpan.textContent = move.value;
+        evaluationSpan.style.position = 'absolute';
+        evaluationSpan.style.color = move.value > 0 ? 'green' : (move.value < 0 ? 'red' : 'black');
+        evaluationSpan.style.fontSize = '20px';
+        evaluationSpan.style.fontWeight = 'bold';
+
+        cell.style.position = 'relative'; // Make sure the cell is relative to the span
+        cell.appendChild(evaluationSpan);
+    });
+}
+
+
 
     function displayBoardAndPlayer() {
         var boardState = getBoardState();
