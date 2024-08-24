@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tic Tac Toe Board Evaluation for papergames
 // @namespace    https://github.com/longkidkoolstar
-// @version      1.0
+// @version      1.0.1
 // @description  Visually shows you the best moves for both teams. Now works at the same time as the AI script I made.
 // @author       longkidkoolstar
 // @icon         https://th.bing.com/th/id/R.5de7901f1a6f988b52dfb02dbd0dfa51?rik=X5ve69dTtmqQ9A&pid=ImgRaw&r=0
@@ -124,6 +124,8 @@ async function logout() {
     }
     createLogoutButton();
 //------------------------------------------------
+var user = await GM.getValue('user', '');
+
 
 (async function() {
     'use strict';
