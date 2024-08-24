@@ -1,32 +1,31 @@
 // ==UserScript==
 // @name         Tic Tac Toe Board Evaluation for papergames
 // @namespace    https://github.com/longkidkoolstar
-// @version      1.0.1
+// @version      2.0
 // @description  Visually shows you the best moves for both teams. Now works at the same time as the AI script I made.
 // @author       longkidkoolstar
 // @icon         https://th.bing.com/th/id/R.5de7901f1a6f988b52dfb02dbd0dfa51?rik=X5ve69dTtmqQ9A&pid=ImgRaw&r=0
 // @match        https://papergames.io/*
 // @license      none
-// @grant        GM.setValue
-// @grant        GM.getValue
+// @grant        none
 // ==/UserScript==
-
-
-(async function() {
+ 
+ 
+(function() {
     'use strict';
-
-var depth = await GM.getValue('depth', depth);
-
+ 
+var depth = localStorage.getItem('depth');
+ 
 // Function to check if the element is visible
 function isElementVisible(element) {
     return element && element.style.display !== 'none';
   }
-
+ 
   // Function to check for the element and click it when it becomes visible
   function waitForElementAndClick(targetElementSelector, triggerElementSelector, pollingInterval) {
     var xMark = document.querySelector(targetElementSelector);
     var countDown = document.querySelector(triggerElementSelector);
-
+ 
     var intervalId = setInterval(function() {
       // Check if the countDown element is now visible
       if (isElementVisible(countDown)) {
@@ -36,19 +35,19 @@ function isElementVisible(element) {
       }
     }, pollingInterval);
   }
-
+ 
   // Start polling every 1 second (adjust the interval as needed)
   waitForElementAndClick('svg.fa-xmark', 'app-count-down span', 1000);
-
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
   function getBoardState() {
     var boardState = [];
     var gridItems = document.querySelectorAll('.grid.size-3x3 .grid-item');
-
+ 
     for (var i = 0; i < 3; i++) {
         var row = [];
         for (var j = 0; j < 3; j++) {
@@ -65,7 +64,7 @@ function isElementVisible(element) {
     }
     return boardState;
 }
-
+ 
 function simulateCellClick(row, col) {
     var gridItems = document.querySelectorAll('.grid.size-3x3 .grid-item');
     var cell = gridItems[row * 3 + col];
@@ -78,32 +77,29 @@ function simulateCellClick(row, col) {
         cell.dispatchEvent(event);
     }
 }
-
+ 
     var prevChronometerValue = null;
-
-// Check if username is stored using GM.getValue
-(async function() {
-    let user = await GM.getValue('user', '');
-
-    if (!user) {
-        // Alert the user
-        alert('Username is not stored.');
-
-        // Prompt the user to enter the username
-        user = prompt('Please enter your Papergames username (case-sensitive):');
-
-        // Save the username using GM.setValue
-        await GM.setValue('user', user);
+ 
+ 
+      // Check if user is stored in local storage
+      var user = localStorage.getItem('user');
+ 
+      if (!user) {
+          // Alert the user
+          alert('Username is not stored in local storage.');
+ 
+          // Prompt the user to enter the user
+          user = prompt('Please enter your Papergames user (case-sensitive):');
+ 
+          // Save the user to local storage
+          localStorage.setItem('user', user);
+      }
+ 
+function logout() {
+        localStorage.removeItem('user');
+        location.reload();
     }
-})();
-
-async function logout() {
-    // Remove the stored username
-    await GM.deleteValue('user');
-    location.reload();
-}
-
-
+ 
     function createLogoutButton() {
         var logoutButton = document.createElement('button');
         logoutButton.textContent = 'Logout';
@@ -124,12 +120,10 @@ async function logout() {
     }
     createLogoutButton();
 //------------------------------------------------
-var user = await GM.getValue('user', '');
-
-
-(async function() {
+ 
+(function() {
     'use strict';
-
+ 
     // Create a container for the dropdown
     var dropdownContainer = document.createElement('div');
     dropdownContainer.style.position = 'fixed';
@@ -139,7 +133,7 @@ var user = await GM.getValue('user', '');
     dropdownContainer.style.backgroundColor = '#1b2837';
     dropdownContainer.style.border = '1px solid #18bc9c';
     dropdownContainer.style.borderRadius = '5px';
-
+ 
     // Create a button to toggle the dropdown
     var toggleButton = document.createElement('button');
     toggleButton.textContent = 'Settings';
@@ -155,49 +149,49 @@ var user = await GM.getValue('user', '');
     toggleButton.addEventListener('mouseout', function() {
         toggleButton.style.opacity = '1'; // Restore the button opacity when mouse leaves
     });
-
+ 
     // Create the dropdown content
     var dropdownContent = document.createElement('div');
     dropdownContent.style.display = 'none';
     dropdownContent.style.padding = '8px';
-
-
+ 
+ 
     // Create the "Auto Queue" tab
     var autoQueueTab = document.createElement('div');
     autoQueueTab.textContent = 'Auto Queue';
     autoQueueTab.style.padding = '5px 0';
     autoQueueTab.style.cursor = 'pointer';
-
+ 
     // Create the "Depth Slider" tab
     var depthSliderTab = document.createElement('div');
     depthSliderTab.textContent = 'Depth Slider';
     depthSliderTab.style.padding = '5px 0';
     depthSliderTab.style.cursor = 'pointer';
-
+ 
     // Create the settings for "Auto Queue"
     var autoQueueSettings = document.createElement('div');
     autoQueueSettings.textContent = 'Auto Queue Settings';
     autoQueueSettings.style.display = 'none'; // Initially hidden
     autoQueueSettings.style.padding = '10px';
-
+ 
     // Create the settings for "Depth Slider"
     var depthSliderSettings = document.createElement('div');
     depthSliderSettings.style.display = 'none'; // Initially displayed for this tab
     depthSliderSettings.style.padding = '10px';
-
+ 
     // Create the depth slider
     var depthSlider = document.createElement('input');
     depthSlider.type = 'range';
     depthSlider.min = '1';
     depthSlider.max = '100';
-    var storedDepth = await GM.getValue('depth');
+    var storedDepth = localStorage.getItem('depth');
     depthSlider.value = storedDepth !== null ? storedDepth : '20';
-
+ 
     // Add event listener to the depth slider
-    depthSlider.addEventListener('input', async function(event) {
+    depthSlider.addEventListener('input', function(event) {
         var depth = Math.round(depthSlider.value);
-        await GM.setValue('depth', depth.toString());
-
+        localStorage.setItem('depth', depth.toString());
+ 
         // Show the popup with the current depth value
         var popup = document.querySelector('.depth-popup'); // Use an existing popup or create a new one
         if (!popup) {
@@ -212,32 +206,32 @@ var user = await GM.getValue('user', '');
             popup.style.display = 'none';
             document.body.appendChild(popup);
         }
-
+ 
         popup.innerText = 'Depth: ' + depth;
         popup.style.display = 'block';
-
+ 
         // Calculate slider position and adjust popup position
         var sliderRect = depthSlider.getBoundingClientRect();
         var popupX = sliderRect.left + ((depthSlider.value - depthSlider.min) / (depthSlider.max - depthSlider.min)) * sliderRect.width - popup.clientWidth / 2;
         var popupY = sliderRect.top - popup.clientHeight - 10;
-
+ 
         popup.style.left = popupX + 'px';
         popup.style.top = popupY + 'px';
-
+ 
         // Start a timer to hide the popup after a certain duration (e.g., 2 seconds)
         setTimeout(function() {
             popup.style.display = 'none';
         }, 2000);
     });
-
+ 
     // Append the depth slider to the "Depth Slider" settings
     depthSliderSettings.appendChild(depthSlider);
-
-
+ 
+ 
     // Create the settings for "Auto Queue"
     var autoQueueSettings = document.createElement('div');
     autoQueueSettings.style.padding = '10px';
-
+ 
     // Create the "Auto Queue" toggle button
     var autoQueueToggleButton = document.createElement('button');
     autoQueueToggleButton.textContent = 'Auto Queue Off';
@@ -247,36 +241,36 @@ var user = await GM.getValue('user', '');
     autoQueueToggleButton.style.backgroundColor = 'red'; // Initially red for "Off"
     autoQueueToggleButton.style.color = 'white';
     autoQueueToggleButton.addEventListener('click', toggleAutoQueue);
-
+ 
     autoQueueSettings.appendChild(autoQueueToggleButton);
-
+ 
     var isAutoQueueOn = false; // Track the state
-
+ 
     function toggleAutoQueue() {
         // Toggle the state
         isAutoQueueOn = !isAutoQueueOn;
         localStorage.setItem('isToggled', isAutoQueueOn);
-
+ 
         // Update the button text and style based on the state
         autoQueueToggleButton.textContent = isAutoQueueOn ? 'Auto Queue On' : 'Auto Queue Off';
         autoQueueToggleButton.style.backgroundColor = isAutoQueueOn ? 'green' : 'red';
     }
-
+ 
     function clickLeaveRoomButton() {
         var leaveRoomButton = document.querySelector("button.btn-light.ng-tns-c189-7");
         if (leaveRoomButton) {
             leaveRoomButton.click();
         }
     }
-
-
+ 
+ 
     function clickPlayOnlineButton() {
         var playOnlineButton = document.querySelector("button.btn-secondary.flex-grow-1");
         if (playOnlineButton) {
             playOnlineButton.click();
         }
     }
-
+ 
     // Periodically check for buttons when the toggle is on
     function checkButtonsPeriodically() {
         if (isAutoQueueOn) {
@@ -284,51 +278,51 @@ var user = await GM.getValue('user', '');
             clickPlayOnlineButton();
         }
     }
-
-
-
-
+ 
+ 
+ 
+ 
     // Set up periodic checking
     setInterval(checkButtonsPeriodically, 1000);
-
+ 
 //------------------------------------------------------------------------Testing Purposes
-
+ 
 let previousNumber = null; // Initialize the previousNumber to null
-
+ 
 function trackAndClickIfDifferent() {
   // Select the <span> element using its class name
   const spanElement = document.querySelector('app-count-down span');
-
+ 
   if (spanElement) {
     // Extract the number from the text content
     const number = parseInt(spanElement.textContent, 10);
-
+ 
     // Check if parsing was successful
     if (!isNaN(number)) {
-
-
+ 
+ 
       // Check if the number has changed since the last check
       if (previousNumber !== null && number !== previousNumber && isAutoQueueOn) {
         spanElement.click();
       }
-
+ 
       // Update the previousNumber with the current value
       previousNumber = number;
     }
   }
 }
-
+ 
 // Set up an interval to call the function at regular intervals (e.g., every 1 second)
 setInterval(trackAndClickIfDifferent, 1000); // 1000 milliseconds = 1 second
-
-
-
+ 
+ 
+ 
 //-------------------------------------------------------------------------------------------
-
-
+ 
+ 
     // Append the toggle button to the "Auto Queue" settings
     autoQueueSettings.appendChild(autoQueueToggleButton);
-
+ 
     // Add event listeners to the tabs to toggle their respective settings
     autoQueueTab.addEventListener('click', function() {
         // Hide the depth slider settings
@@ -337,24 +331,24 @@ setInterval(trackAndClickIfDifferent, 1000); // 1000 milliseconds = 1 second
         autoQueueSettings.style.display = 'block';
         autoQueueToggleButton.style.display = 'block';
     });
-
+ 
     depthSliderTab.addEventListener('click', function() {
         // Hide the auto queue settings
         autoQueueSettings.style.display = 'none';
         // Show the depth slider settings
         depthSliderSettings.style.display = 'block';
     });
-
+ 
     // Append the tabs and settings to the dropdown content
     dropdownContent.appendChild(autoQueueTab);
     dropdownContent.appendChild(autoQueueSettings);
     dropdownContent.appendChild(depthSliderTab);
     dropdownContent.appendChild(depthSliderSettings);
-
+ 
     // Append the button and dropdown content to the container
     dropdownContainer.appendChild(toggleButton);
     dropdownContainer.appendChild(dropdownContent);
-
+ 
     // Toggle the dropdown when the button is clicked
     toggleButton.addEventListener('click', function() {
         if (dropdownContent.style.display === 'none') {
@@ -363,62 +357,62 @@ setInterval(trackAndClickIfDifferent, 1000); // 1000 milliseconds = 1 second
             dropdownContent.style.display = 'none';
         }
     });
-
+ 
     // Append the dropdown container to the document body
     document.body.appendChild(dropdownContainer);
 })();
-
-
-
-
+ 
+ 
+ 
+ 
 //------------------------------------------------
-
-
-
+ 
+ 
+ 
 function updateBoard(squareId) {
     var row = parseInt(squareId[0]);
     var col = parseInt(squareId[1]);
-
+ 
     var profileOpeners = document.querySelectorAll(".text-truncate.cursor-pointer");
     var profileOpener = null;
-
+ 
     profileOpeners.forEach(function(opener) {
         if (opener.textContent.trim() === user) {
             profileOpener = opener;
         }
     });
-
+ 
     var chronometer = document.querySelector("app-chronometer");
-
+ 
     var numberElement = profileOpener.parentNode.querySelectorAll("span")[4];
     var profileOpenerParent = profileOpener.parentNode.parentNode;
     var svgElement = profileOpenerParent.querySelector("circle[class*='circle-dark-stroked']");
     if (!svgElement) {
         svgElement = profileOpenerParent.querySelector("svg[class*='fa-xmark']");
     }
-
+ 
     if (svgElement && svgElement.closest("circle[class*='circle-dark-stroked']")) {
         player = 'o'; // Player is playing as "O"
     } else if (svgElement && svgElement.closest("svg[class*='fa-xmark']")) {
         player = 'x'; // Player is playing as "X"
     }
-
+ 
     var currentElement = chronometer || numberElement;
-
+ 
     if (currentElement.textContent !== prevChronometerValue && profileOpener) {
         prevChronometerValue = currentElement.textContent;
         //simulateCellClick(row, col);
     } else {
         console.log("Waiting for AI's turn...");
     }
-
+ 
     return player;
 }
-
+ 
 var player;
-
-
-
+ 
+ 
+ 
     function initGame() {
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
@@ -427,32 +421,32 @@ var player;
                 }
             });
         });
-
+ 
         observer.observe(document.getElementById('tic-tac-toe-board'), { attributes: true, childList: true, subtree: true });
     }
 console.log(player)
-
+ 
 function initAITurn() {
     displayBoardAndPlayer();
     var boardState = getBoardState();
     var bestMove = findBestMove(boardState, player);
     updateBoard(bestMove.row.toString() + bestMove.col.toString());
 }
-
+ 
 function findBestMove(board, player) {
     var bestVal = -1000;
     var bestMove = { row: -1, col: -1 };
     var moveEvaluations = []; // Array to store evaluations
-
+ 
     for (var i = 0; i < 3; i++) {
         for (var j = 0; j < 3; j++) {
             if (board[i][j] === '_') {
                 board[i][j] = player;
                 var moveVal = minimax(board, 0, false, depth);
                 board[i][j] = '_';
-
+ 
                 moveEvaluations.push({ row: i, col: j, value: moveVal });
-
+ 
                 if (moveVal > bestVal) {
                     bestMove.row = i;
                     bestMove.col = j;
@@ -461,16 +455,16 @@ function findBestMove(board, player) {
             }
         }
     }
-
+ 
     // Call a function to display the evaluations on the board
     displayMoveEvaluations(moveEvaluations);
-
+ 
     return bestMove;
 }
-
+ 
 function displayMoveEvaluations(evaluations) {
     var gridItems = document.querySelectorAll('.grid.size-3x3 .grid-item');
-
+ 
     // First, remove any existing evaluation spans
     gridItems.forEach(function(cell) {
         var existingSpan = cell.querySelector('span');
@@ -478,11 +472,11 @@ function displayMoveEvaluations(evaluations) {
             cell.removeChild(existingSpan);
         }
     });
-
+ 
     // Now, add the new evaluations
     evaluations.forEach(function(move) {
         var cell = gridItems[move.row * 3 + move.col];
-
+ 
         // Create a span element to display the evaluation value
         var evaluationSpan = document.createElement('span');
         evaluationSpan.textContent = move.value;
@@ -490,14 +484,14 @@ function displayMoveEvaluations(evaluations) {
         evaluationSpan.style.color = move.value > 0 ? 'green' : (move.value < 0 ? 'red' : 'black');
         evaluationSpan.style.fontSize = '20px';
         evaluationSpan.style.fontWeight = 'bold';
-
+ 
         cell.style.position = 'relative'; // Make sure the cell is relative to the span
         cell.appendChild(evaluationSpan);
     });
 }
-
-
-
+ 
+ 
+ 
     function displayBoardAndPlayer() {
         var boardState = getBoardState();
         //console.log("AI Player: " + player);
@@ -506,29 +500,29 @@ function displayMoveEvaluations(evaluations) {
             console.log(row.join(' | '));
         });
     }
-
+ 
     function getOpponent(player) {
         return player === 'x' ? 'o' : 'x';
     }
     function minimax(board, depth, isMaximizingPlayer, maxDepth) {
         var score = evaluateBoard(board);
-
+ 
         if (depth === maxDepth) {
             return evaluateBoard(board);
         }
-
+ 
         if (score === 10)
             return score - depth;
-
+ 
         if (score === -10)
             return score + depth;
-
+ 
         if (areMovesLeft(board) === false)
             return 0;
-
+ 
         if (isMaximizingPlayer) {
             var best = -1000;
-
+ 
             for (var i = 0; i < 3; i++) {
                 for (var j = 0; j < 3; j++) {
                     if (board[i][j] === '_') {
@@ -541,7 +535,7 @@ function displayMoveEvaluations(evaluations) {
             return best;
         } else {
             var best = 1000;
-
+ 
             for (var i = 0; i < 3; i++) {
                 for (var j = 0; j < 3; j++) {
                     if (board[i][j] === '_') {
@@ -562,7 +556,7 @@ function displayMoveEvaluations(evaluations) {
                 else if (board[row][0] !== '_') return -10;
             }
         }
-
+ 
         // Check columns for victory
         for (let col = 0; col < 3; col++) {
             if (board[0][col] === board[1][col] && board[1][col] === board[2][col]) {
@@ -570,22 +564,22 @@ function displayMoveEvaluations(evaluations) {
                 else if (board[0][col] !== '_') return -10;
             }
         }
-
+ 
         // Check diagonals for victory
         if (board[0][0] === board[1][1] && board[1][1] === board[2][2]) {
             if (board[0][0] === player) return +10;
             else if (board[0][0] !== '_') return -10;
         }
-
+ 
         if (board[0][2] === board[1][1] && board[1][1] === board[2][0]) {
             if (board[0][2] === player) return +10;
             else if (board[0][2] !== '_') return -10;
         }
-
+ 
         // If no one has won, return 0
         return 0;
     }
-
+ 
     function areMovesLeft(board) {
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
@@ -594,11 +588,11 @@ function displayMoveEvaluations(evaluations) {
         }
         return false;
     }
-
+ 
     setInterval(function() {
         initAITurn();
     }, 1000);
-
+ 
     document.addEventListener('DOMContentLoaded', function() {
         initGame();
         console.log(player);
